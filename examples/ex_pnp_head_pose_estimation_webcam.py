@@ -8,6 +8,7 @@
 #
 
 import numpy
+import math
 import cv2
 import sys
 from deepgaze.haar_cascade import haarCascade
@@ -15,7 +16,7 @@ from deepgaze.face_landmark_detection import faceLandmarkDetection
 
 
 #If True enables the verbose mode
-DEBUG = True 
+DEBUG = False 
 
 #Antropometric constant values of the human head. 
 #Found on wikipedia and on:
@@ -121,9 +122,9 @@ def main():
                                   P3D_STOMION])
 
     #Declaring the two classifiers
-    my_cascade = haarCascade("./etc/xml/haarcascade_frontalface_alt.xml", "./etc/xml/haarcascade_profileface.xml")
+    my_cascade = haarCascade("../etc/xml/haarcascade_frontalface_alt.xml", "../etc/xml/haarcascade_profileface.xml")
     #TODO If missing, example file can be retrieved from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-    my_detector = faceLandmarkDetection('./etc/shape_predictor_68_face_landmarks.dat')
+    my_detector = faceLandmarkDetection('../etc/shape_predictor_68_face_landmarks.dat')
 
     #Error counter definition
     no_face_counter = 0
@@ -289,6 +290,17 @@ def main():
                 # (a, b, c) >> Blue = a, Green = b and Red = c
                 #Our axis/color convention is X=R, Y=G, Z=B
                 sellion_xy = (landmarks_2D[7][0], landmarks_2D[7][1])
+
+            #=======================角度算出=========================
+                rvec_matrix = cv2.Rodrigues(rvec)[0]
+                proj_matrix = numpy.hstack((rvec_matrix, tvec))
+
+                euler_angles = cv2.decomposeProjectionMatrix(proj_matrix)[6]
+
+                cv2.putText(frame, "yaw"   + str(euler_angles[1])   + "[deg]", (20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255),1)
+                cv2.putText(frame, "pitch" + str(euler_angles[0]) + "[deg]", (20,40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0),1)
+                cv2.putText(frame, "roll " + str(euler_angles[2])  + "[deg]", (20,60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255),1)
+
                 cv2.line(frame, sellion_xy, tuple(imgpts[1].ravel()), (0,255,0), 3) #GREEN
                 cv2.line(frame, sellion_xy, tuple(imgpts[2].ravel()), (255,0,0), 3) #BLUE
                 cv2.line(frame, sellion_xy, tuple(imgpts[0].ravel()), (0,0,255), 3) #RED

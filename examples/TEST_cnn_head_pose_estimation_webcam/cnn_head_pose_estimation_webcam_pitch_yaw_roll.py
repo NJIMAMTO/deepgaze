@@ -43,6 +43,7 @@ else:
 
 #Create the main window and move it
 cv2.namedWindow('Video')
+cv2.moveWindow('Video', 500, 50)
 
 #Obtaining the CAM dimension
 #cam_w = int(video_capture.get(3))
@@ -55,7 +56,7 @@ while(True):
     ret, frame = video_capture.read()
     height, width, channels = frame.shape
 
-    clp_frame = frame[0:height, 0:height]   
+    clp_frame = frame[0:height, (width - height) * 1/2 : (width + height) * 1/2]   
 
     c_x = height / 2
     c_y = height / 2
@@ -101,6 +102,9 @@ while(True):
     cv2.putText(clp_frame, "yaw"   + str(yaw[0,0,0])   + "[deg]", (20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255),1);
     cv2.putText(clp_frame, "pitch" + str(pitch[0,0,0]) + "[deg]", (20,40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0),1);
     cv2.putText(clp_frame, "roll " + str(roll[0,0,0])  + "[deg]", (20,60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255),1);
+
+    #test
+    cv2.rectangle(clp_frame, (height/2 - 150, height/2 - 150), (height/2 + 150, height/2 + 150), (0, 0, 255), 5)
     cv2.imshow('Video', clp_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'): break
